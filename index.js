@@ -246,12 +246,14 @@ const addRole = () => {
 
 const viewAllDepartments = () => {
 
-    const sql = `SELECT  from department;`
+    const sql = `SELECT id AS Department_Id, name as Department_Name from department;`
 
     db.query(sql, (err, rows) => {
         if (err) {
             throw err;
         }
+        console.log('\r\n');
+        
         console.table(rows);
         console.log('\r\n');
         userPrompts();
@@ -261,12 +263,14 @@ const viewAllDepartments = () => {
 
 const viewAllRoles = () => {
 
-    const sql = `SELECT * from roles;`
+    const sql = `SELECT roles.id AS Role_Id, roles.title as Role, d.name AS Department_Name, roles.salary AS Salary from
+        roles, department d WHERE roles.dept_id = d.id;`
 
     db.query(sql, (err, rows) => {
         if (err) {
             throw err;
         }
+        console.log('\r\n');
         console.table(rows);
         console.log('\r\n');
         userPrompts();
@@ -276,12 +280,18 @@ const viewAllRoles = () => {
 
 const viewAllEmployees = () => {
 
-    const sql = `SELECT * from employee;`
+    const sql = `select e.id AS Employee_Id, CONCAT(e.first_name, " ",e.last_name) AS Employee, r.title AS Role,
+    d.name AS Department, r.salary as Salary, CONCAT(emp.first_name, " ",emp.last_name) AS Manager
+    FROM employee e
+    LEFT JOIN employee emp ON e.manager_id = emp.id
+    JOIN roles r ON e.role_id = r.id
+    JOIN department d ON r.dept_id = d.id;`
 
     db.query(sql, (err, rows) => {
         if (err) {
             throw err;
         }
+        console.log('\r\n');
         console.table(rows);
         console.log('\r\n');
         userPrompts();
