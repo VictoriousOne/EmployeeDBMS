@@ -334,7 +334,7 @@ const updateEmployeeRole = () => {
         {
             type: "input",
             name: "dummy",
-            message: "To be ignored- just press enter"
+            message: "Press enter to begin employee update"
         },
         {
             type: "list",
