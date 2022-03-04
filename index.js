@@ -10,7 +10,7 @@ const connectDB = () => {
                 return reject(err)
             }
             //console.log('Database connected.');
-            return resolve(console.log('Database connected.'));
+            return resolve(console.log('Database connected.\r\n\r\n'));
 
 
         });
