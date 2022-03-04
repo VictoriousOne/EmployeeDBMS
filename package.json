@@ -1,11 +1,10 @@
 {
-  "name": "u-develop-it",
+  "name": "employeedbms",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "start": "node server.js"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -19,7 +18,7 @@
   },
   "homepage": "https://github.com/VictoriousOne/u-develop-it#readme",
   "dependencies": {
-    "express": "^4.17.2",
+    "console.table": "^0.10.0",
     "inquirer": "^8.2.0",
     "mysql2": "^2.3.3"
   },

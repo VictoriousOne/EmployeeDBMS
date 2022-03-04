@@ -34,7 +34,7 @@ INSERT INTO roles (title, salary, dept_id)
 VALUE ("Corporate Lawyer Assistant", 95000, 2);
 
 INSERT INTO roles (title, salary, dept_id)
-VALUE ("Sr, Accountant", 110000, 3);
+VALUE ("Sr. Accountant", 110000, 3);
 
 INSERT INTO roles (title, salary, dept_id)
 VALUE ("Accountant", 90000, 3);
