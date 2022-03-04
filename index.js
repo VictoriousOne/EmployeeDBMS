@@ -1,11 +1,21 @@
-
 const db = require('./db/connection');
 const inquirer = require('inquirer');
 
-db.connect(err => {
-    if (err) throw err;
-    //console.log('Database connected.');
-});
+
+const connectDB = () => {
+    return new Promise((resolve, reject) => {
+
+        db.connect(err => {
+            if (err) {
+                return reject(err)
+            }
+            //console.log('Database connected.');
+            return resolve(console.log('Database connected.'));
+
+
+        });
+    });
+};
 
 
 var departments = [];
@@ -15,10 +25,10 @@ const getDepartments = () => {
     db.query(sql, (err, rows) => {
         if (err) {
             throw err;
-        }
+        };
         for (var i = 0; i < rows.length; i++) {
             departments.push(rows[i].name);
-        }
+        };
 
     });
     return departments;
@@ -31,15 +41,17 @@ const getRoles = () => {
     db.query(sql, (err, rows) => {
         if (err) {
             throw err;
-        }
+        };
         for (var i = 0; i < rows.length; i++) {
             roles.push(rows[i].title);
-        }
+        };
 
     });
     return roles;
 };
 
+
+var managerResults;
 var managers = [];
 const getManagers = () => {
     const sql = `SELECT CONCAT(first_name,'-',last_name) AS Name FROM employee WHERE manager_id IS NULL;`
@@ -47,30 +59,92 @@ const getManagers = () => {
     db.query(sql, (err, rows) => {
         if (err) {
             throw err;
-        }
+        };
         for (var i = 0; i < rows.length; i++) {
             managers.push(rows[i].Name);
-        }
+        };
 
     });
     return managers;
 };
 
-var employees = [];
+
+const getManagers2 = () => {
+    const selectManagers = () => {
+        return new Promise((resolve, reject) => {
+            const sql = `SELECT CONCAT(first_name,'-',last_name) AS Name FROM employee WHERE manager_id IS NULL;`
+            //const sql = `SELECT first_name,last_name FROM employee WHERE manager_id IS NULL;`
+
+            db.query(sql, (err, managerResults) => {
+                if (err) {
+                    return reject(err)
+                }
+                //console.Table(managerResults);
+                return resolve(managerResults);
+            });
+
+
+        });
+    };
+
+    selectManagers()
+        .then(rows => {
+            for (var i = 0; i < rows.length; i++) {
+                managers.push(rows[i].Name);
+            }
+            console.table(managers);
+        });
+        console.log("Leaving getManagers");
+
+    return managers;
+}; 
+
+const employees = [];
 const getEmployees = () => {
+    const selectEmployees = () => {
+        return new Promise((resolve, reject) => {
+            const sql = `SELECT CONCAT(first_name,'-',last_name) AS Name FROM employee;`
+            //const sql = `SELECT first_name,last_name FROM employee WHERE manager_id IS NULL;`
+
+            db.query(sql, (err, employeeResults) => {
+                if (err) {
+                    return reject(err)
+                }
+                //console.Table(managerResults);
+                return resolve(employeeResults);
+            });
+
+
+        });
+    };
+
+    selectEmployees()
+        .then(rows => {
+            for (var i = 0; i < rows.length; i++) {
+                employees.push(rows[i].Name);
+            }
+            
+        });
+        
+
+    return employees;
+}; 
+
+//var employees = [];
+const getEmployees2 = () => {
     const sql = `SELECT CONCAT(first_name,'-',last_name) AS Name FROM employee;`
 
-    db.query(sql, (err, rows) => {
+     db.query(sql,  (err, rows) => {
         if (err) {
             throw err;
-        }
+        };
         for (var i = 0; i < rows.length; i++) {
             employees.push(rows[i].Name);
-        }
-
+        };
+         //return employees;
     });
-    console.table(employees);
-    return employees;
+    
+   return employees;
 };
 
 const addEmployee = () => {
@@ -119,7 +193,7 @@ const addEmployee = () => {
                         throw err;
                     }
                     viewAllEmployees();
-                })
+                });
 
 
             });
@@ -165,14 +239,14 @@ const addRole = () => {
         })
         .then(result => {
             viewAllRoles();
-        })
+        });
 
 }
 
 
 const viewAllDepartments = () => {
 
-    const sql = `SELECT * from department;`
+    const sql = `SELECT  from department;`
 
     db.query(sql, (err, rows) => {
         if (err) {
@@ -240,18 +314,23 @@ const addDepartment = () => {
         })
         .then(result => {
             viewAllDepartments();
-        })
+        });
 
 };
 
 const updateEmployeeRole = () => {
-
+    var empList = getEmployees();
     return inquirer.prompt([
         {
-            type: 'list',
-            name: 'empName',
-            message: 'Choose the employee to update',
-            choices: getEmployees()
+            type: "input",
+            name: "dummy",
+            message: "To be ignored- just press enter"
+        },
+        {
+            type: "list",
+            name: "empName",
+            message: "Choose the employee to update",
+            choices: empList
         },
         {
             type: 'list',
@@ -259,31 +338,31 @@ const updateEmployeeRole = () => {
             message: 'Choose the new role for the employee',
             choices: getRoles()
         }
-        
+
     ])
-    .then(empData => {
+        .then(empData => {
 
-        let sql = `SELECT id FROM roles WHERE title = ?;`
-        let parms = [empData.empRole];
-        db.query(sql, parms, (err, row) => {
-            if (err) {
-                throw err;
-            }
-
-            let sql = `UPDATE employee SET role_id = ? 
-            WHERE CONCAT(first_name,'-',last_name) = ?;`
-            let parms = [row[0].id, empData.empName];
-            db.query(sql, parms, (err, result) => {
+            let sql = `SELECT id FROM roles WHERE title = ?;`
+            let parms = [empData.empRole];
+            db.query(sql, parms, (err, row) => {
                 if (err) {
                     throw err;
                 }
-                viewAllEmployees();
+
+                let sql = `UPDATE employee SET role_id = ? 
+            WHERE CONCAT(first_name,'-',last_name) = ?;`
+                let parms = [row[0].id, empData.empName];
+                db.query(sql, parms, (err, result) => {
+                    if (err) {
+                        throw err;
+                    }
+                    viewAllEmployees();
+                });
+
+
             });
 
-
         });
-
-    })
 }
 const userPrompts = () => {
 
@@ -328,43 +407,12 @@ const userPrompts = () => {
             }
             else {
                 console.log("\r\n\r\n Exiting Employee Management System");
-                db.close();
+                db.end();
 
             }
 
-            /*
-            switch (userChoice.userAction) {
-                case "View All Departments":
-                    viewAllDepartments();
-                    break;
-
-                case "View All Roles":
-                    viewAllRoles();
-                    break;
-
-                case "Add a Department":
-                    addDepartment();
-                    break;
-
-                case "Add Role":
-                    addRole();
-                    break;
-
-                case "Add an Employee":
-                    addEmployee();
-                    break;
-
-                case "Update an Employee Role":
-                    updateEmployeeRole();
-                    break;
-
-                default:
-                    console.log("\r\n\r\n Exiting Employee Management System");
-
-
-            }
-            */
-        })
+            
+        });
 
 };
 
@@ -372,5 +420,14 @@ console.log(`
 =========================================
 Welcome to the Employee Management System
 =========================================`);
-console.log('\r\n');
-userPrompts();
+//console.log('\r\n');
+//userPrompts();
+
+
+connectDB()
+   .then(response => {
+        //var myemployees = getManagers()
+        //.then(console.table(myemployees)); 
+        //console.table(myemployees);
+        userPrompts();
+    }); 
